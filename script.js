@@ -123,37 +123,109 @@ if (lockedVideo) {
   keepVideoPlaying();
 }
 
-/* ========= LIVE YOUTUBE SUBSCRIBER COUNT ========= */
+/* ========= LIVE STATS ========= */
 
 const YT_API_KEY = "AIzaSyBuFSPAUKL2XC_SOZLQmgk-AQD1aTOC2vM";
 const YT_CHANNEL_ID = "UCHfQt0mb3UkLSgodQfGv3IQ";
+const TWITCH_CLIENT_ID = "ojt9it5gh2sf8hxq3jhd8zj0p4xmwe";
+const TWITCH_CLIENT_SECRET = "4yunorsw9c1lvjhuqfz53k0d70uuo8";
+const TWITCH_USERNAME = "ug_dax";
+const DISCORD_SERVER_ID = "1093851483268710420";
 
-async function fetchYouTubeSubs() {
+function updateStatCard(label, value) {
+  const statCards = document.querySelectorAll(".stat-card");
+  statCards.forEach(card => {
+    const cardLabel = card.querySelector("p");
+    const cardNumber = card.querySelector("h3");
+    if (!cardLabel || !cardNumber) return;
+    if (cardLabel.textContent.trim() === label) {
+      cardNumber.textContent = Number(value).toLocaleString();
+      cardNumber.removeAttribute("data-target");
+    }
+  });
+}
+
+// YouTube stats
+async function fetchYouTubeStats() {
   try {
     const res = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${YT_CHANNEL_ID}&key=${YT_API_KEY}`
     );
     const data = await res.json();
-    const subs = data.items[0].statistics.subscriberCount;
-
-    const subElements = document.querySelectorAll("[data-target]");
-    subElements.forEach(el => {
-      if (el.closest(".stat-card") && el.nextElementSibling &&
-          el.nextElementSibling.textContent.trim() === "Subscribers") {
-        el.textContent = Number(subs).toLocaleString();
-        el.removeAttribute("data-target");
-      }
-    });
-
+    const stats = data.items[0].statistics;
+    updateStatCard("Subscribers", stats.subscriberCount);
+    updateStatCard("Videos", stats.videoCount);
   } catch (err) {
-    console.log("Could not fetch YouTube subs:", err);
+    console.log("YouTube fetch error:", err);
   }
 }
 
-fetchYouTubeSubs();
+// Twitch followers
+async function fetchTwitchFollowers() {
+  try {
+    // Get access token
+    const tokenRes = await fetch(
+      `https://id.twitch.tv/oauth2/token?client_id=${TWITCH_CLIENT_ID}&client_secret=${TWITCH_CLIENT_SECRET}&grant_type=client_credentials`,
+      { method: "POST" }
+    );
+    const tokenData = await tokenRes.json();
+    const accessToken = tokenData.access_token;
+
+    // Get user ID
+    const userRes = await fetch(
+      `https://api.twitch.tv/helix/users?login=${TWITCH_USERNAME}`,
+      {
+        headers: {
+          "Client-ID": TWITCH_CLIENT_ID,
+          "Authorization": `Bearer ${accessToken}`
+        }
+      }
+    );
+    const userData = await userRes.json();
+    const userId = userData.data[0].id;
+
+    // Get follower count
+    const followRes = await fetch(
+      `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}`,
+      {
+        headers: {
+          "Client-ID": TWITCH_CLIENT_ID,
+          "Authorization": `Bearer ${accessToken}`
+        }
+      }
+    );
+    const followData = await followRes.json();
+    updateStatCard("Twitch Followers", followData.total);
+  } catch (err) {
+    console.log("Twitch fetch error:", err);
+  }
+}
+
+// Discord members
+async function fetchDiscordMembers() {
+  try {
+    const res = await fetch(
+      `https://discord.com/api/guilds/${DISCORD_SERVER_ID}/widget.json`
+    );
+    const data = await res.json();
+    updateStatCard("Discord Members", data.presence_count);
+  } catch (err) {
+    console.log("Discord fetch error:", err);
+  }
+}
+
+fetchYouTubeStats();
+fetchTwitchFollowers();
+fetchDiscordMembers();
 
 // Refresh every 5 minutes
-setInterval(fetchYouTubeSubs, 5 * 60 * 1000);
+setInterval(() => {
+  fetchYouTubeStats();
+  fetchTwitchFollowers();
+  fetchDiscordMembers();
+}, 5 * 60 * 1000);
+
+
 
 /* ========= COUNTER ANIMATION ========= */
 
