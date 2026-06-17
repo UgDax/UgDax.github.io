@@ -62,51 +62,79 @@ body{
 
 /* ===== LOADER ===== */
 
-#loader{
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:99999;
+#loader {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
 }
 
-.loader-content{
-  text-align:center;
+#loader .loader-content {
+  text-align: center;
 }
 
-.loader-content h1{
-  font-family:'Orbitron',sans-serif;
-  color:var(--purple-light);
-  letter-spacing:4px;
+#loader h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  color: #a78bfa;
+  letter-spacing: 6px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px #7c3aed, 0 0 40px #7c3aed;
+  animation: pulse 1.5s infinite;
 }
 
-.loader-bar{
-  width:280px;
-  height:8px;
-  margin-top:20px;
-  background:#222;
-  border-radius:100px;
-  overflow:hidden;
+#loader .loader-bar {
+  width: 300px;
+  height: 4px;
+  background: rgba(167, 139, 250, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 auto 20px;
 }
 
-.loader-bar span{
-  display:block;
-  height:100%;
-  width:0%;
-  background:linear-gradient(
-  90deg,
-  var(--purple),
-  var(--purple-light)
-  );
-  animation:loading 2.5s linear forwards;
+#loader .loader-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+  animation: load 2.5s ease-in-out forwards;
+  box-shadow: 0 0 10px #a78bfa;
 }
 
-@keyframes loading{
-  100%{
-    width:100%;
-  }
+#loader .loader-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  color: #a78bfa;
+  letter-spacing: 4px;
+  animation: blink 1s infinite;
+}
+
+#loader .loader-credit {
+  position: absolute;
+  bottom: 20px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  color: rgba(167, 139, 250, 0.4);
+  letter-spacing: 2px;
+}
+
+@keyframes load {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 /* ===== NAVBAR ===== */
