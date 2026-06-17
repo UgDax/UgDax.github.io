@@ -123,6 +123,38 @@ if (lockedVideo) {
   keepVideoPlaying();
 }
 
+/* ========= LIVE YOUTUBE SUBSCRIBER COUNT ========= */
+
+const YT_API_KEY = "AIzaSyBuFSPAUKL2XC_SOZLQmgk-AQD1aTOC2vM";
+const YT_CHANNEL_ID = "UCHfQt0mb3UkLSgodQfGv3IQ";
+
+async function fetchYouTubeSubs() {
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${YT_CHANNEL_ID}&key=${YT_API_KEY}`
+    );
+    const data = await res.json();
+    const subs = data.items[0].statistics.subscriberCount;
+
+    const subElements = document.querySelectorAll("[data-target]");
+    subElements.forEach(el => {
+      if (el.closest(".stat-card") && el.nextElementSibling &&
+          el.nextElementSibling.textContent.trim() === "Subscribers") {
+        el.textContent = Number(subs).toLocaleString();
+        el.removeAttribute("data-target");
+      }
+    });
+
+  } catch (err) {
+    console.log("Could not fetch YouTube subs:", err);
+  }
+}
+
+fetchYouTubeSubs();
+
+// Refresh every 5 minutes
+setInterval(fetchYouTubeSubs, 5 * 60 * 1000);
+
 /* ========= COUNTER ANIMATION ========= */
 
 const counters = document.querySelectorAll("[data-target]");
@@ -502,6 +534,7 @@ link.classList.add(
 console.log(
 "🔥 Unknown GamingYT V3 Loaded Successfully!"
 );
+
 // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
 document.addEventListener("keydown", function(e) {
 
@@ -522,6 +555,7 @@ document.addEventListener("keydown", function(e) {
     }
 
 });
+
 // Disable Right Click
 document.addEventListener("contextmenu", function(e) {
     e.preventDefault();
